@@ -48,7 +48,6 @@ impl ScalarUDFImpl for UnionFunc {
     }
 
     fn return_type(&self, arg_types: &[DataType]) -> Result<DataType> {
-
         if arg_types.len() < 2 {
             return exec_err!("Union function requires at least two arguments");
         }
@@ -65,12 +64,12 @@ impl ScalarUDFImpl for UnionFunc {
     }
 
     fn invoke(&self, args: &[ColumnarValue]) -> Result<ColumnarValue> {
-
         if args.len() < 2 {
             return exec_err!("Union function requires at least two arguments");
         }
 
-        let arrays: Vec<ArrayRef> = args.iter()
+        let arrays: Vec<ArrayRef> = args
+            .iter()
             .map(|arg| match arg {
                 ColumnarValue::Array(array) => Ok(array.clone()),
                 _ => exec_err!("Invalid argument type for union function"),
@@ -85,7 +84,8 @@ impl ScalarUDFImpl for UnionFunc {
             }
         }
 
-        let array_refs: Vec<&dyn arrow::array::Array> = arrays.iter().map(|array| array.as_ref()).collect();
+        let array_refs: Vec<&dyn arrow::array::Array> =
+            arrays.iter().map(|array| array.as_ref()).collect();
 
         Ok(ColumnarValue::Array(concat(&array_refs)?))
     }
@@ -103,10 +103,7 @@ mod tests {
 
         // Test with the same type
         let arg_types = vec![DataType::Int64, DataType::Int64];
-        assert_eq!(
-            union_func.return_type(&arg_types).unwrap(),
-            DataType::Int64
-        );
+        assert_eq!(union_func.return_type(&arg_types).unwrap(), DataType::Int64);
 
         // Test with different types
         let arg_types = vec![DataType::Int64, DataType::Float64];
@@ -118,8 +115,10 @@ mod tests {
         let union_func = UnionFunc::new();
 
         // Test with two integer arrays
-        let array1 = std::sync::Arc::new(Int64Array::from(vec![Some(1), Some(2)])) as ArrayRef;
-        let array2 = std::sync::Arc::new(Int64Array::from(vec![Some(3), Some(4)])) as ArrayRef;
+        let array1 =
+            std::sync::Arc::new(Int64Array::from(vec![Some(1), Some(2)])) as ArrayRef;
+        let array2 =
+            std::sync::Arc::new(Int64Array::from(vec![Some(3), Some(4)])) as ArrayRef;
         let args = vec![
             ColumnarValue::Array(array1.clone()),
             ColumnarValue::Array(array2.clone()),
@@ -127,7 +126,8 @@ mod tests {
 
         let result = union_func.invoke(&args).unwrap();
         if let ColumnarValue::Array(result_array) = result {
-            let result_array = result_array.as_any().downcast_ref::<Int64Array>().unwrap();
+            let result_array =
+                result_array.as_any().downcast_ref::<Int64Array>().unwrap();
             assert_eq!(result_array.len(), 4);
             assert_eq!(result_array.value(0), 1);
             assert_eq!(result_array.value(1), 2);
@@ -138,11 +138,9 @@ mod tests {
         }
 
         // Test with an integer array and a float array
-        let array3 = std::sync::Arc::new(Float64Array::from(vec![Some(1.1), Some(2.2)])) as ArrayRef;
-        let args = vec![
-            ColumnarValue::Array(array1),
-            ColumnarValue::Array(array3),
-        ];
+        let array3 = std::sync::Arc::new(Float64Array::from(vec![Some(1.1), Some(2.2)]))
+            as ArrayRef;
+        let args = vec![ColumnarValue::Array(array1), ColumnarValue::Array(array3)];
 
         assert!(union_func.invoke(&args).is_err());
     }
