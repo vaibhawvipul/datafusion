@@ -26,6 +26,7 @@ pub mod nullif;
 pub mod nvl;
 pub mod nvl2;
 pub mod r#struct;
+pub mod union;
 
 // create UDFs
 make_udf_function!(arrow_cast::ArrowCastFunc, ARROW_CAST, arrow_cast);
@@ -37,6 +38,7 @@ make_udf_function!(r#struct::StructFunc, STRUCT, r#struct);
 make_udf_function!(named_struct::NamedStructFunc, NAMED_STRUCT, named_struct);
 make_udf_function!(getfield::GetFieldFunc, GET_FIELD, get_field);
 make_udf_function!(coalesce::CoalesceFunc, COALESCE, coalesce);
+make_udf_function!(union::UnionFunc, UNION, union);
 
 // Export the functions out of this package, both as expr_fn as well as a list of functions
 export_functions!(
@@ -48,5 +50,6 @@ export_functions!(
     (r#struct, args, "Returns a struct with the given arguments"),
     (named_struct, args, "Returns a struct with the given names and arguments pairs"),
     (get_field, arg_1 arg_2, "Returns the value of the field with the given name from the struct"),
-    (coalesce, args, "Returns `coalesce(args...)`, which evaluates to the value of the first expr which is not NULL")
+    (coalesce, args, "Returns `coalesce(args...)`, which evaluates to the value of the first expr which is not NULL"),
+    (union, args, "Returns the first non-null value from the arguments")
 );
