@@ -193,7 +193,7 @@ John_new
 
 # create tables with union
 statement ok
-create table t1_union_type (u union(num integer, str varchar)) as values (1), ('two')
+CREATE TABLE t1_union_type (u UNION(num INTEGER, str VARCHAR)) AS VALUES (1), ('two')
 
 # should be un-nested, with a single (logical) aggregate
 query TT
